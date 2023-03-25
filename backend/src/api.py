@@ -69,7 +69,13 @@ def get_drinks_detail():
     returns status code 200 and json {"success": True, "drinks": drink} where drink an array containing only the newly created drink
         or appropriate status code indicating reason for failure
 '''
+@app.route('/drinks', methods=['POST'])
+def create_drink():
+    body = request.get_json()
+    print(body)
 
+    return jsonify({"success": True,
+                    "drinks": []})
 
 '''
 @TODO implement endpoint
@@ -82,6 +88,12 @@ def get_drinks_detail():
     returns status code 200 and json {"success": True, "drinks": drink} where drink an array containing only the updated drink
         or appropriate status code indicating reason for failure
 '''
+@app.route('/drinks/<int:id>', methods=["PATCH"])
+def update_drink(id):
+    print(f'Update of drink with id: {id}')
+
+    return jsonify({"success":True,
+                    "drinks":[]})
 
 
 '''
@@ -94,7 +106,11 @@ def get_drinks_detail():
     returns status code 200 and json {"success": True, "delete": id} where id is the id of the deleted record
         or appropriate status code indicating reason for failure
 '''
-
+@app.route('/drinks/<int:id>', methods=["DELETE"])
+def delete_drink(id):
+    print(f'Deletion of drink with id: {id}')
+    return jsonify({"success":True,
+                    "drinks":id})
 
 # Error Handling
 '''
