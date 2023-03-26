@@ -50,7 +50,8 @@ def get_drinks():
         or appropriate status code indicating reason for failure
 '''
 @app.route('/drinks-detail')
-def get_drinks_detail():
+@requires_auth('get:drinks-detail')
+def get_drinks_detail(jwt):
     selection = Drink.query.all()
     drinks = []
 
@@ -70,7 +71,8 @@ def get_drinks_detail():
         or appropriate status code indicating reason for failure
 '''
 @app.route('/drinks', methods=['POST'])
-def create_drink():
+@requires_auth('post:drinks')
+def create_drink(jwt):
     body = request.get_json()
     print(body)
 
@@ -89,7 +91,8 @@ def create_drink():
         or appropriate status code indicating reason for failure
 '''
 @app.route('/drinks/<int:id>', methods=["PATCH"])
-def update_drink(id):
+@requires_auth('patch:drinks')
+def update_drink(jwt, id):
     print(f'Update of drink with id: {id}')
 
     return jsonify({"success":True,
@@ -107,7 +110,8 @@ def update_drink(id):
         or appropriate status code indicating reason for failure
 '''
 @app.route('/drinks/<int:id>', methods=["DELETE"])
-def delete_drink(id):
+@requires_auth('delete:drinks')
+def delete_drink(jwt, id):
     print(f'Deletion of drink with id: {id}')
     return jsonify({"success":True,
                     "drinks":id})
