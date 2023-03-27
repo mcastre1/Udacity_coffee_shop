@@ -31,14 +31,17 @@ with app.app_context():
 '''
 @app.route('/drinks')
 def get_drinks():
-    selection = Drink.query.all()
-    drinks = []
+    try:
+        selection = Drink.query.all()
+        drinks = []
 
-    for drink in selection:
-        drinks.append(drink.short())
+        for drink in selection:
+            drinks.append(drink.short())
 
-    return jsonify({'success':True,
-                    'drinks':drinks})
+        return jsonify({'success':True,
+                        'drinks':drinks})
+    except:
+        abort(400)
 
 
 '''
@@ -74,10 +77,22 @@ def get_drinks_detail(jwt):
 @requires_auth('post:drinks')
 def create_drink(jwt):
     body = request.get_json()
-    print(body)
+    try:
+        title = str(body.get('title'))
+        recipe = str(body.get('recipe')).replace("'", '"')
 
-    return jsonify({"success": True,
-                    "drinks": []})
+        drink = Drink()
+        drink.title = title
+        drink.recipe = recipe
+
+        drink.insert()
+
+        #print(drink.long())
+
+        return jsonify({"success": True,
+                        "drinks": []})
+    except:
+        abort(400)
 
 '''
 @TODO implement endpoint
@@ -93,11 +108,31 @@ def create_drink(jwt):
 @app.route('/drinks/<int:id>', methods=["PATCH"])
 @requires_auth('patch:drinks')
 def update_drink(jwt, id):
-    print(f'Update of drink with id: {id}')
+    body = request.get_json()
+    try:
+        # Get drink to be updated
+        drink = Drink.query.get(int(id))
 
-    return jsonify({"success":True,
-                    "drinks":[]})
+        # if no drink is found then we return
+        # not found.
+        if not drink:
+            abort(404)
 
+        # collect all data to be updated
+        title = str(body.get('title'))
+        recipe = str(body.get('recipe')).replace("'", '"')
+
+        # update data
+        drink.title = title
+        drink.recipe = recipe
+
+        # commit
+        drink.update()
+
+        return jsonify({"success":True,
+                        "drinks":[]})
+    except:
+        abort(400)
 
 '''
 @TODO implement endpoint
@@ -113,8 +148,21 @@ def update_drink(jwt, id):
 @requires_auth('delete:drinks')
 def delete_drink(jwt, id):
     print(f'Deletion of drink with id: {id}')
-    return jsonify({"success":True,
+
+    try:
+        # Get drink row with id.
+        drink = Drink.query.get(int(id))
+        
+        # If no row with {id} is found, abort 404
+        if not drink:
+            abort(404)
+        
+        # Delete and return succesfully
+        drink.delete()
+        return jsonify({"success":True,
                     "drinks":id})
+    except:
+        abort(400)
 
 # Error Handling
 '''
@@ -146,9 +194,22 @@ def unprocessable(error):
 @TODO implement error handler for 404
     error handler should conform to general task above
 '''
-
+@app.errorhandler(404)
+def not_found(error):
+    return jsonify({
+        'success': False,
+        'error': 404,
+        'message': 'Not found.'
+    }), 404
 
 '''
 @TODO implement error handler for AuthError
     error handler should conform to general task above
 '''
+@app.errorhandler(AuthError)
+def auth_error(error):
+    return jsonify({
+        "success": False,
+        "error": error.status_code,
+        "message": error.error['description']
+    }), error.status_code
