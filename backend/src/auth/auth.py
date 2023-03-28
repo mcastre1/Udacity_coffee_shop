@@ -81,10 +81,10 @@ def get_token_auth_header():
 def check_permissions(permission, payload):
     if 'permissions' not in payload:
         abort(401)
-    
+
     if permission not in payload['permissions']:
         abort(403)
-    
+
     return True
 
 
@@ -152,9 +152,9 @@ def verify_decode_jwt(token):
                 'description': 'Unable to parse authentication token.'
             }, 400)
     raise AuthError({
-                'code': 'invalid_header',
+        'code': 'invalid_header',
                 'description': 'Unable to find the appropriate key.'
-            }, 400)
+    }, 400)
 
 
 '''
@@ -176,7 +176,7 @@ def requires_auth(permission=''):
             token = get_token_auth_header()
             try:
                 payload = verify_decode_jwt(token)
-            except:
+            except BaseException:
                 abort(401)
 
             check_permissions(permission, payload)
