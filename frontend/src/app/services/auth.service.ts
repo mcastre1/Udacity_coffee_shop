@@ -10,10 +10,10 @@ const JWTS_ACTIVE_INDEX_KEY = 'JWTS_ACTIVE_INDEX_KEY';
   providedIn: 'root'
 })
 export class AuthService {
-  url = environment.auth0.url;
+  domain = environment.auth0.domain;            // NEW
   audience = environment.auth0.audience;
   clientId = environment.auth0.clientId;
-  callbackURL = environment.auth0.callbackURL;
+  redirectUri = environment.auth0.redirectUri;  // NEW
 
   token: string;
   payload: any;
@@ -22,24 +22,19 @@ export class AuthService {
 
   build_login_link(callbackPath = '') {
     let link = 'https://';
-    link += this.url + '.auth0.com';
-    link += '/authorize?';
+    link += this.domain + '/authorize?';  // UPDATED
     link += 'audience=' + this.audience + '&';
     link += 'response_type=token&';
     link += 'client_id=' + this.clientId + '&';
-    link += 'redirect_uri=' + this.callbackURL + callbackPath;
+    link += 'redirect_uri=' + this.redirectUri + callbackPath + '&';
+    link += 'prompt=login';
     return link;
   }
 
-  // invoked in app.component on load
   check_token_fragment() {
-    // parse the fragment
     const fragment = window.location.hash.substr(1).split('&')[0].split('=');
-    // check if the fragment includes the access token
-    if ( fragment[0] === 'access_token' ) {
-      // add the access token to the jwt
+    if (fragment[0] === 'access_token') {
       this.token = fragment[1];
-      // save jwts to localstore
       this.set_jwt();
     }
   }
@@ -75,6 +70,9 @@ export class AuthService {
   }
 
   can(permission: string) {
-    return this.payload && this.payload.permissions && this.payload.permissions.length && this.payload.permissions.indexOf(permission) >= 0;
+    return this.payload &&
+           this.payload.permissions &&
+           this.payload.permissions.length &&
+           this.payload.permissions.indexOf(permission) >= 0;
   }
 }
