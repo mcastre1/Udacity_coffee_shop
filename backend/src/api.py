@@ -232,3 +232,7 @@ def auth_error(error):
         "error": error.status_code,
         "message": error.error['description']
     }), error.status_code
+
+
+if __name__ == '__main__':
+    app.run()
